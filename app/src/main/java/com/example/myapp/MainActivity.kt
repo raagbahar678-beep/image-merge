@@ -793,6 +793,12 @@ class MainActivity : Activity() {
                 outLabel = queryDisplayName(outTree, outRoot)
                 val outDir = DocumentsContract.buildDocumentUriUsingTree(outTree, outRoot)
                 val existing = listNames(outTree)
+                var maxNum = 0L
+                for (k in existing.keys) {
+                    val num = k.substringBeforeLast('.').toLongOrNull()
+                    if (num != null && num > maxNum) maxNum = num
+                }
+                var nextNum = maxNum + 1L
 
                 for (b in 0 until numBatches) {
                     if (cancelFlag) {
@@ -828,7 +834,8 @@ class MainActivity : Activity() {
                     }
                     // at most one save in flight (keeps memory bounded)
                     waitFor(pendingRef)
-                    val outName = String.format(Locale.US, "%s_batch_%03d.png", folder, b + 1)
+                    val outName = String.format(Locale.US, "%d.png", nextNum)
+                    nextNum += 1L
                     val toSave: Bitmap = bmp
                     pendingRef.set(
                         saver.submit(Runnable {
